@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+        <head>
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+
+                <!-- Load Bootstrap -->
+                <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+                <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+                <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+                <!-- End of Bootstrap -->
+
+		<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.4.0/css/font-awesome.min.css">
+		<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js"></script>
+		<link rel="stylesheet" href="style.css">
+
+		<title>Kaupunginosasivujen hallintaty&ouml;kalu</title>
+</head>
+<body>
+	<div class="container">
+	<div ng-app="globalAdmin" ng-controller="basicCtrl">
+		<h1>Kaupunginosa<wbr>sivujen hallintaty&ouml;kalu</h1>
+		<p><a href="yllapitajat">Kaupunginosasivujen yll&auml;pit&auml;j&auml;t &gt;&gt;</a></p>
+		<!-- ----------------------------
+			Filter buttons
+		----------------------------- -->
+
+		<div class="filterbutton selectall">
+			<input type="checkbox" id="type-all" ng-change="selectAll();" ng-model="typefilters.all" />
+			<label class="btn btn-success" for="type-all" ng-class="{active: typefilters.all}">Kaikki</label>
+		</div>
+		<div class="filterbutton">
+			<input type="checkbox" id="type-ko" ng-model="typefilters.ko" />
+			<label class="btn btn-primary" for="type-ko" ng-class="{active: typefilters.ko}">Tavalliset kaupunginosasivut</label>
+		</div>
+		<div class="filterbutton">
+			<input type="checkbox" id="type-old_layout" ng-model="typefilters.old_layout" />
+			<label class="btn btn-primary" for="type-old_layout" ng-class="{active: typefilters.old_layout}">Uudistumassa olevat</label>
+		</div>
+		<div class="filterbutton">
+			<input type="checkbox" id="type-new_layout" ng-model="typefilters.new_layout" />
+			<label class="btn btn-primary" for="type-new_layout" ng-class="{active: typefilters.new_layout}">Uudet ulkoasut</label>
+		</div>
+		<div class="filterbutton">
+			<input type="checkbox" id="type-helka" ng-model="typefilters.helka" />
+			<label class="btn btn-primary" for="type-helka" ng-class="{active: typefilters.helka}">Helkan sivut</label>
+		</div>
+		<div class="filterbutton">
+			<input type="checkbox" id="type-project" ng-model="typefilters.project" />
+			<label class="btn btn-primary" for="type-project" ng-class="{active: typefilters.project}">Projektisivut</label>
+		</div>
+		<div class="filterbutton">
+			<input type="checkbox" id="type-test" ng-model="typefilters.test" />
+			<label class="btn btn-primary" for="type-test" ng-class="{active: typefilters.test}">Testisivut</label>
+		</div>
+
+		<input class="text-filter" ng-model="filter" type="text" placeholder="Hae..." autofocus>
+		<div class="loading" ng-if="sites == 'loading'"><i class="fa fa-spin fa-spinner"></i> Ladataan, odota hetki...</div>
+		<div class="table-responsive">
+		<table class="table table-bordered table-striped table-condensed" ng-if="sites != 'loading'">
+
+			<!-- ----------------------------
+				Header row
+			----------------------------- -->
+
+			<tr>
+				<th rowspan="2" class="clickable" ng-click="changeOrder('Sitename')">
+					Nimi
+					<span ng-if="orderBy == 'Sitename' && !reverseOrder">&#8593;</span>
+					<span ng-if="orderBy == 'Sitename' && reverseOrder">&#8595;</span>
+				</th>
+				<th rowspan="2">Hallinta</th>
+				<th rowspan="2" class="clickable" ng-click="changeOrder('Version')">
+					Joomla!-<br>versio
+					<span ng-if="orderBy == 'Version' && !reverseOrder">&#8593;</span>
+					<span ng-if="orderBy == 'Version' && reverseOrder">&#8595;</span>
+				</th>
+				<th rowspan="2" class="clickable" ng-click="changeOrder('NewLayout')">
+					Ulkoasu-<br>uudistus
+					<span ng-if="orderBy == 'NewLayout' && !reverseOrder">&#8593;</span>
+					<span ng-if="orderBy == 'NewLayout' && reverseOrder">&#8595;</span>
+				</th>
+				<th rowspan="2" class="clickable" ng-click="changeOrder('Palveluhakemisto')">
+					Palvelu-<br>hakemisto
+					<span ng-if="orderBy == 'Palveluhakemisto' && !reverseOrder">&#8593;</span>
+					<span ng-if="orderBy == 'Palveluhakemisto' && reverseOrder">&#8595;</span>
+				</th>
+				<th rowspan="2" class="clickable" ng-click="changeOrder('KOForum')">
+					Keskustelu-<br>alue
+					<span ng-if="orderBy == 'KOForum' && !reverseOrder">&#8593;</span>
+					<span ng-if="orderBy == 'KOForum' && reverseOrder">&#8595;</span>
+				</th>
+				<th rowspan="2" class="clickable" ng-click="changeOrder('HelkaCal')">
+					Tapahtuma-<br>kalenteri
+					<span ng-if="orderBy == 'HelkaCal' && !reverseOrder">&#8593;</span>
+					<span ng-if="orderBy == 'HelkaCal' && reverseOrder">&#8595;</span>
+				</th>
+				<th colspan="3">KoConDe	</th>
+				<!-- th rowspan="2" class="clickable" ng-click="changeOrder('Prefix')">
+					Prefix
+					<span ng-if="orderBy == 'Prefix' && !reverseOrder">&#8593;</span>
+					<span ng-if="orderBy == 'Prefix' && reverseOrder">&#8595;</span>
+				</th -->
+				<th rowspan="2" class="clickable" ng-click="changeOrder('Spambots')">
+					Spambots
+					<span ng-if="orderBy == 'Spambots' && !reverseOrder">&#8593;</span>
+					<span ng-if="orderBy == 'Spambots' && reverseOrder">&#8595;</span>
+				</th>
+			</tr>
+			<tr>
+				<th class="clickable" ng-click="changeOrder('Editor')">
+					P&auml;&auml;t.
+					<span ng-if="orderBy == 'Editor' && !reverseOrder">&#8593;</span>
+					<span ng-if="orderBy == 'Editor' && reverseOrder">&#8595;</span>
+				</th>
+				<th class="clickable" ng-click="changeOrder('PublicContact')">
+					Paik.
+					<span ng-if="orderBy == 'PublicContact' && !reverseOrder">&#8593;</span>
+					<span ng-if="orderBy == 'PublicContact' && reverseOrder">&#8595;</span>
+				</th>
+				<th class="clickable" ng-click="changeOrder('Announcements')">
+					Tied.
+					<span ng-if="orderBy == 'Announcements' && !reverseOrder">&#8593;</span>
+					<span ng-if="orderBy == 'Announcements' && reverseOrder">&#8595;</span>
+				</th>
+			</tr>
+
+			<!-- --------------------------------------------------------------
+				Use AngularJS to make a row for each site
+			--------------------------------------------------------------- -->
+
+			<tr ng-repeat="site in sites | filter:filter | type:typefilters | orderBy: orderBy : reverseOrder">
+				<td ng-class="{'danger': site.Sitename == 'Kaupunginosasivusto' || site.Sitename == 'Joomla'}">
+					{{ $index+1 }}.
+					<a href="{{ site.Url }}" target="_blank">{{ site.Sitename }}</a>
+					<span class="unpublished" ng-if="site.Type == 'new_layout'">(julkaisematon)</span>
+				</td>
+				<td><a href="{{ site.Url }}/administrator" target="_blank">[Hallinta]</a></td>
+				<td ng-class="{'success': site.Version == latestVersion, 'danger': site.Version != latestVersion}">{{ site.Version }}</td>
+				<td ng-class="{'success': site.NewLayout == 2, 'warning': site.NewLayout == 1, 'danger': site.NewLayout == 0}"></td>
+				<td ng-class="{'success': site.Palveluhakemisto == 1, 'danger': site.Palveluhakemisto == 0}"></td>
+				<td ng-class="{'success': site.KOForum == 'koforum', 'warning': site.KOForum == 'kunena', 'danger': site.KOForum != 'koforum' && site.KOForum != 'kunena'}">{{ site.KOForum }}</td>
+				<td ng-class="{'success': site.HelkaCal == 1, 'danger': site.HelkaCal == 0}"></td>
+				<td ng-class="{'success': site.Editor == 1, 'danger': site.Editor == 0}"></td>
+				<td ng-class="{'success': site.PublicContact == 1, 'danger': site.PublicContact == 0}"></td>
+				<td ng-class="{'success': site.Announcements == 1, 'danger': site.Announcements == 0}"></td>
+				<!-- td ng-class="{'success': site.Prefix == 'j17_', 'warning': site.Prefix != 'j17_'}">{{ site.Prefix }}</td -->
+				<td ng-class="{'success': site.Spambots == 0, 'danger': site.Spambots > 0}">{{ site.Spambots }}</td>
+			</tr>
+
+			<!-- ------------------------------
+				Footer row
+			------------------------------- -->
+
+			<tr class="table-footer">
+				<td>Yhteens&auml;</td>
+				<td>{{ sites | filter:filter | type:typefilters | total }}</td>
+				<td>{{ sites | filter:filter | type:typefilters | total:'Version' }}</td>
+				<td>{{ sites | filter:filter | type:typefilters | total:'NewLayout' }}+{{ sites | filter:filter | type:typefilters | total:'OldLayout' }}</td>
+				<td>{{ sites | filter:filter | type:typefilters | total:'Palveluhakemisto' }}</td>
+				<td>{{ sites | filter:filter | type:typefilters | total:'KOForum' }}</td>
+				<td>{{ sites | filter:filter | type:typefilters | total:'HelkaCal' }}</td>
+				<td>{{ sites | filter:filter | type:typefilters | total:'Editor' }}</td>
+				<td>{{ sites | filter:filter | type:typefilters | total:'PublicContact' }}</td>
+				<td>{{ sites | filter:filter | type:typefilters | total:'Announcements' }}</td>
+				<td>{{ sites | filter:filter | type:typefilters | total:'Spambots' }}</td>
+			</tr>
+
+		</table>
+	</div>
+	</div>
+	</div>
+	<script>
+		var latestVersion = '3.4.4';
+		var app = angular.module('globalAdmin', []);
+		app.controller('basicCtrl', function($scope, $http) {
+			$scope.sites = 'loading';
+			$http.get("data.php").success(function(response) {
+				$scope.sites = response.sites;
+			});
+
+			setInterval(function(){
+				$http.get("data.php").success(function(response) {
+					$scope.sites = response.sites;
+				});
+			}, 30000);
+
+			$scope.orderBy = 'Sitename';
+			$scope.reverseOrder = 0;
+			$scope.latestVersion = latestVersion;
+
+			$scope.changeOrder = function(order) {
+				if ($scope.orderBy == order) {
+					$scope.reverseOrder--;
+					$scope.reverseOrder *= -1;
+				}
+				else $scope.reverseOrder = 0;
+				$scope.orderBy = order;
+			};
+			$scope.selectAll = function() {
+				$scope.typefilters.ko = $scope.typefilters.all;
+				$scope.typefilters.old_layout = $scope.typefilters.all;
+				$scope.typefilters.new_layout = $scope.typefilters.all;
+				$scope.typefilters.helka = $scope.typefilters.all;
+				$scope.typefilters.project = $scope.typefilters.all;
+				$scope.typefilters.test = $scope.typefilters.all;
+			};
+
+			$scope.typefilters = [];
+			$scope.typefilters.ko = true;
+			$scope.typefilters.new_layout = true;
+			$scope.typefilters.helka = true;
+
+			$scope.totals = [];
+			$scope.totals.ko = 0;
+
+		});
+		app.filter('type', function(){
+			return function (sites, types) {
+				var items = {
+					types: types,
+					out: []
+				};
+				angular.forEach(sites, function(value, key) {
+					if (this.types[value.Type] === true) {
+						this.out.push(value);
+					}
+				}, items);
+				return items.out;
+			};
+		});
+		app.filter('total', function(){
+			return function (sites, property) {
+				var i = sites instanceof Array ? sites.length : 0;
+				if (typeof property === 'undefined' || i === 0) return i;
+				else {
+					var total = 0;
+					while (i--) {
+						if (property == 'Version') {
+							if (sites[i][property] == latestVersion) total++;
+						}
+						else if (property == 'NewLayout') {
+							if (sites[i][property] == 2) total++;
+						}
+						else if (property == 'OldLayout') {
+							if (sites[i]['NewLayout'] == 1) total++;
+						}
+						else if (property == 'KOForum') {
+							if (sites[i][property] == 'koforum') total++;
+						}
+						else if (property == 'Kunena') {
+							if (sites[i]['KOForum'] == 'kunena') total++;
+						}
+						else if (isNaN(sites[i][property])) {
+							throw "Can't calculate NaN.";
+						}
+						else total += sites[i][property];
+					}
+					return total;
+				}
+			};
+		});
+	</script>
+</body>
+</html>

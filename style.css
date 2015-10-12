@@ -1,0 +1,30 @@
+th {
+	background-color: #F0F0F0;
+}
+.clickable, label {
+	cursor: pointer;
+	cursor: hand;
+}
+.filterbutton {
+	display: inline-block;
+}
+.filterbutton > input {
+	display: none;
+}
+
+.filterbutton.selectall {
+	margin-right: 1em;
+}
+th.clickable:hover {
+	background-color: #F3F3F3;
+}
+span.unpublished {
+	font-size: 75%;
+	color: #666;
+}
+.table-footer td:first-child {
+	font-weight: bold;
+}
+.btn {
+	margin-bottom: 2px;
+}
